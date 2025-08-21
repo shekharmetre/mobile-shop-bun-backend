@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  phone       String
+  address     String?
+  useLocation Boolean?
+  authId      String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
+}
+
+model Order {
+  id       String        @id @default(uuid())
+  category OrderCategory @default(mobile_accessory)
+
+  txnId  String? @unique // Payment gateway's txn ID
+  authId String?
+
+  payment   PaymentStatus     @default(cash_on_delivery)
+  txnStatus TransactionStatus @default(processing)
+  delivery  DeliveryType      @default(in_shop)
+  orderFlow OrderFlowStatus   @default(in_progress)
+
+  orderDate  String 
+  totalPrice String
+
+  // Unified location JSON for both home & in-shop
+  // home_delivery => { name, address, maps_url, lat, lng }
+  // in_shop       => { shopName, maps_url, lat, lng, placeId }
+  location Json?
+  signature String?
+  // For accessories
+  // [
+  //   { productId, name, price, qty, totalPrice, image }
+  // ]
+  items Json?
+
+  // For repairs
+  // { brand, modelName, repairType }
+  device Json?
+
+  // Optional notes from user
+  notes Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+enum OrderCategory {
+  mobile_accessory
+  repair
+}
+
+enum PaymentStatus {
+  advanced
+  full_payment
+  cash_on_delivery
+}
+
+enum TransactionStatus {
+  success
+  failed
+  processing
+}
+
+enum DeliveryType {
+  in_shop
+  home_delivery
+}
+
+enum OrderFlowStatus {
+  in_progress
+  shipping_soon
+  out_for_delivery
+  completed
+  cancelled
+}
+
+enum Category {
+  chargers
+  cables
+  audio
+  protection
+  accessories
+  adapters
+  gaming
+  mobile
+  sim
+  powerbanks
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  name          String
+  description   String
+  price         Float
+  discountPrice Float?
+  images        String[] // Prisma supports array types on Postgres
+  category      Category
+  subcategory   String
+  compatibility String[] @default([])
+  features      String[] @default([])
+  rating        Float
+  reviews       Int
+  inStock       Boolean
+  isNew         Boolean? @default(false)
+  isFeatured    Boolean? @default(false)
+  isLatest      Boolean? @default(false)
+}
