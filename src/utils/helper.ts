@@ -210,3 +210,23 @@ export function verifyDuplicate(
   }
   return false; // no matches found
 }
+
+
+export function parseJavaScriptObjectFromCodeBlock(codeString: string) {
+  if (!codeString) {
+    return null;
+  }
+  try {
+    // Remove ```javascript and ``` code block markers
+    const cleaned = codeString
+      .replace(/^\s*```javascript\s*/, "")
+      .replace(/\s*```\s*$/, "");
+
+    // Safely evaluate the cleaned string as an object
+    const obj = new Function(`return ${cleaned}`)();
+    return obj;
+  } catch (error: any) {
+    console.error("Error parsing object:", error.message);
+    return null;
+  }
+}

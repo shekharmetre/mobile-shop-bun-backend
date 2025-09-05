@@ -1,6 +1,5 @@
 // src/routes/user.ts
 import { Elysia, t } from 'elysia'
-import cors from '@elysiajs/cors'
 import { UserController } from '../controllers/user.controller'
 import { PaymentController } from '../controllers/payment.controller'
 import { db } from '../config/database'
@@ -9,20 +8,21 @@ import { verifyPaymentToken, verifySupabaseToken } from '../utils/helper'
 import { ApiResponse } from '../utils/apiResponse'
 import { ssoMiddleware } from '../middlewares/auth.middleware'
 import { Tools } from '@/controllers/tools.controller'
+import cors from '@elysiajs/cors'
 
 const userControl = new UserController()
 const paymentControler = new PaymentController()
 const tools = new Tools()
 
 export const userRoutes = new Elysia({ prefix: '/user' })
-  .use(cors({
-    origin: [
-      'https://www.bhagyawantimobile.shop',  // ✅ correct production frontend
-      'http://localhost:3000',
-      'https://5445-2401-4900-93a5-69e5-71b2-141a-6639-447f.ngrok-free.app'
-    ],
-    credentials: true
-  }))
+  // .use(cors({
+  //   origin: [
+  //     'https://www.bhagyawantimobile.shop',  // ✅ correct production frontend
+  //     'http://localhost:3000',
+  //     'https://5445-2401-4900-93a5-69e5-71b2-141a-6639-447f.ngrok-free.app'
+  //   ],
+  //   credentials: true
+  // }))
   .post(
     '/register',
     async ({ body, set }) => {
